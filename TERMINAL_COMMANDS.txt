@@ -1,0 +1,29 @@
+cd ~/Downloads
+
+mkdir -p ~/wakili-clones
+rm -rf ~/wakili-clones/aw-ndungu-law-advocates
+
+unzip -o aw-ndungu-law-advocates-CECILIA-TEMPLATE.zip -d ~/wakili-clones
+
+cd ~/wakili-clones/aw-ndungu-law-advocates
+
+npm run check
+npm run build
+
+git init
+git add .
+git commit -m "Build A.W Ndung'u Law Advocates website"
+git branch -M main
+
+GH_USER="$(gh api user -q .login)"
+
+if gh repo view "$GH_USER/aw-ndungu-law-advocates" >/dev/null 2>&1; then
+  git remote remove origin 2>/dev/null || true
+  git remote add origin "$(gh repo view "$GH_USER/aw-ndungu-law-advocates" --json sshUrl -q .sshUrl)"
+  git push -u origin main --force
+else
+  gh repo create aw-ndungu-law-advocates --public --source=. --remote=origin --push
+fi
+
+vercel link --yes --project aw-ndungu-law-advocates || true
+vercel --prod --yes
